@@ -28,7 +28,7 @@ provider "aws" {
     tags = {
       ManagedBy   = "PlatformTeam"
       Environment = var.environment
-      Project     = "CloudNative-Commerce"
+      Project     = "CloudNative-Commerce-infra"
     }
   }
 }
