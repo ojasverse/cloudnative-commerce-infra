@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Golden Path: Secure S3 Bucket for Application Logs (Day 1.1)'
+
+Parameters:
+  BucketPrefix:
+    Type: String
+    Description: 'Unique prefix for the log bucket'
+    AllowedPattern: '^[a-z0-9][a-z0-9-]{1,19}$'
+    Default: 'cnc-logs'
+  Environment:
+    Type: String
+    AllowedValues: [dev, staging, prod]
+    Default: 'dev'
+  OwnerEmail:
+    Type: String
+    Description: 'Your email for ownership tagging'
+    AllowedPattern: '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+
+Resources:
+  AppLogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${BucketPrefix}-${AWS::AccountId}-${Environment}'
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: ManagedBy
+          Value: PlatformTeam
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: CostCenter
+          Value: CloudNative-Commerce
+        - Key: Owner
+          Value: !Ref OwnerEmail
+
+Outputs:
+  BucketArn:
+    Description: 'ARN of the provisioned log bucket'
+    Value: !GetAtt AppLogBucket.Arn
